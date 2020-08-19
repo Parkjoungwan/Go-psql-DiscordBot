@@ -39,9 +39,15 @@ create table channel_basic
 	primary key (channelid)
 );
 
-create talbe channel_connected(
+create table channel_connected(
 	channelid int not null,
 	connectionname varchar(45) null,
 	connectionurl varchar(200) null,
 	activate boolean
 );
+
+제약조건 추가
+
+alter table channel_connected add constraint
+ channelid forien key(channelid)
+ references channel_basic(channelid);
