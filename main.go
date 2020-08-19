@@ -1,14 +1,37 @@
 package main
 
 import (
+	"database/sql"
 	"flag"
 	"fmt"
+	"github.com/bwmarrin/discordgo"
+	_ "github.com/lib/pq"
 	"os"
 	"os/signal"
 	"syscall"
-
-	"github.com/bwmarrin/discordgo"
 )
+
+const (
+	DB_USER     = "dscbot"
+	DB_PASSWORD = "dscbot0215"
+	DB_NAME     = "dscbot"
+)
+
+//DBconnect for connect to postgresql
+func DBconnect() {
+	dbinfo := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable", DB_USER, DB_PASSWORD, DB_NAME)
+	//vaildate postgrewql db
+	db, err := sql.Open("postgres", dbinfo)
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+	//create connection with Postgresql db
+	err = db.Ping()
+	if err != nil {
+		panic(err)
+	}
+}
 
 // Variables used for command line parameters
 var (
@@ -42,7 +65,6 @@ func main() {
 		fmt.Println("error opening connection,", err)
 		return
 	}
-
 	// Wait here until CTRL-C or other term signal is received.
 	fmt.Println("Bot is now running.  Press CTRL-C to exit.")
 	sc := make(chan os.Signal, 1)
@@ -57,7 +79,6 @@ func main() {
 // message is created on any channel that the authenticated bot has access to.
 
 func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
-
 	// Ignore all messages created by the bot itself
 	// This isn't required in this specific example but it's a good practice.
 	if m.Author.ID == s.State.User.ID {

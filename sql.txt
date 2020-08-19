@@ -49,5 +49,5 @@ create table channel_connected(
 제약조건 추가
 
 alter table channel_connected add constraint
- channelid forien key(channelid)
+ channelid foreign key(channelid)
  references channel_basic(channelid);
