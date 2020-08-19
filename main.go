@@ -8,6 +8,7 @@ import (
 	_ "github.com/lib/pq"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 )
 
@@ -18,7 +19,7 @@ const (
 )
 
 //DBconnect for connect to postgresql
-func DBconnect() {
+func DBconnect(s *discordgo.Session, m *discordgo.MessageCreate, state int) {
 	dbinfo := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable", DB_USER, DB_PASSWORD, DB_NAME)
 	//vaildate postgrewql db
 	db, err := sql.Open("postgres", dbinfo)
@@ -30,6 +31,20 @@ func DBconnect() {
 	err = db.Ping()
 	if err != nil {
 		panic(err)
+	}
+	if state == 1 {
+		message := m.Content
+		message = strings.Replace(message, "!item ", "", 1)
+		INFO := strings.Split(message, " ")
+		sqlStatement := `
+		INSERT INTO channel_basic (channelid,channelinfo,trellourl)
+		VALUES ($1, $2, $3)`
+		channelid := m.ChannelID
+		_, err = db.Exec(sqlStatement, channelid, INFO[0], INFO[1])
+		if err != nil {
+			panic(err)
+		}
+		s.ChannelMessageSend(m.ChannelID, "추가완료")
 	}
 }
 
@@ -81,8 +96,13 @@ func main() {
 func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Ignore all messages created by the bot itself
 	// This isn't required in this specific example but it's a good practice.
+
 	if m.Author.ID == s.State.User.ID {
 		return
+	}
+	// If the message has "item" add info to DB
+	if strings.Contains(m.Content, "!item") {
+		DBconnect(s, m, 1)
 	}
 	// If the message is "ping" reply with "Pong!"
 	if m.Content == "ping" {
