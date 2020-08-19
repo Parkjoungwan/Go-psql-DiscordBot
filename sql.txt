@@ -12,13 +12,13 @@ CREATE TABLE DSC_ChatBot_DB.Channel_Basic
 
 
 -- Channel_Basic Table Create SQL
+
 CREATE TABLE DSC_ChatBot_DB.Channel_connected
 (
     `ChannelID`       INT            NOT NULL    COMMENT '채널 아이디', 
     `ConnectionName`  VARCHAR(45)    NULL        COMMENT '연결된 타 플랫폼 이름', 
     `ConnectionInfo`  VARCHAR(50)    NULL        COMMENT '타 플랫폼 URL', 
-    `Activate`        TINYINT(1)     NULL        COMMENT '진행 여부(프로젝트, 스터디)', 
-    PRIMARY KEY (ChannelID)
+    `Activate`        TINYINT(1)     NULL        COMMENT '진행 여부(프로젝트, 스터디)'
 );
 
 ALTER TABLE DSC_ChatBot_DB.Channel_connected
@@ -39,3 +39,9 @@ create table channel_basic
 	primary key (channelid)
 );
 
+create talbe channel_connected(
+	channelid int not null,
+	connectionname varchar(45) null,
+	connectionurl varchar(200) null,
+	activate boolean
+);
