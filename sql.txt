@@ -1,0 +1,41 @@
+-- 테이블 순서는 관계를 고려하여 한 번에 실행해도 에러가 발생하지 않게 정렬되었습니다.
+
+-- Channel_Basic Table Create SQL
+CREATE TABLE DSC_ChatBot_DB.Channel_Basic
+(
+    `ChannelID`    INT             NOT NULL    AUTO_INCREMENT COMMENT '채널 아이디', 
+    `ChannelInfo`  VARCHAR(150)    NULL        COMMENT '채널 정보', 
+    `TrelloURL`    VARCHAR(50)     NULL        COMMENT 'Trello URL', 
+    `Activate`     TINYINT(1)      NULL        COMMENT '진행 여부(프로젝트, 스터디)', 
+    PRIMARY KEY (ChannelID)
+);
+
+
+-- Channel_Basic Table Create SQL
+CREATE TABLE DSC_ChatBot_DB.Channel_connected
+(
+    `ChannelID`       INT            NOT NULL    COMMENT '채널 아이디', 
+    `ConnectionName`  VARCHAR(45)    NULL        COMMENT '연결된 타 플랫폼 이름', 
+    `ConnectionInfo`  VARCHAR(50)    NULL        COMMENT '타 플랫폼 URL', 
+    `Activate`        TINYINT(1)     NULL        COMMENT '진행 여부(프로젝트, 스터디)', 
+    PRIMARY KEY (ChannelID)
+);
+
+ALTER TABLE DSC_ChatBot_DB.Channel_connected
+    ADD CONSTRAINT FK_Channel_connected_ChannelID_Channel_Basic_ChannelID FOREIGN KEY (ChannelID)
+        REFERENCES DSC_ChatBot_DB.Channel_Basic (ChannelID) ON DELETE RESTRICT ON UPDATE RESTRICT;
+
+-----------------------------------------------
+
+위는 mysql
+아래는 postgresql
+
+create table channel_basic
+(
+	channelid int not null
+	channelinfo varchar(500) null
+	trellourl varchar(200) null
+	activate boolean
+	primary key (channelid)
+);
+
