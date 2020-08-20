@@ -57,7 +57,7 @@ func DBconnect(s *discordgo.Session, m *discordgo.MessageCreate, state int) {
 			if err != nil {
 				panic(err)
 			}
-			s.ChannelMessageSend(m.ChannelID, "채널정보갱신"+INFO[0])
+			s.ChannelMessageSend(m.ChannelID, "채널정보갱신")
 			return
 		}
 		sqlStatement := `
@@ -70,17 +70,21 @@ func DBconnect(s *discordgo.Session, m *discordgo.MessageCreate, state int) {
 		}
 		s.ChannelMessageSend(m.ChannelID, "추가완료")
 	}
+	//view channelinfo
 	if state == 2 {
+		//info is channelinfo
 		var info string
 		err := db.QueryRow("select channelinfo from channel_basic where channelid=$1", m.ChannelID).Scan(&info)
 		if err != nil {
 			panic(err)
 		}
+		//url is trellourl
 		var url string
 		err = db.QueryRow("select trellourl from channel_basic where channelid=$1", m.ChannelID).Scan(&url)
 		if err != nil {
 			panic(err)
 		}
+		//show info + url in discord
 		s.ChannelMessageSend(m.ChannelID, "chanenlinfo: "+info+"\n trellourl: "+url)
 	}
 }
