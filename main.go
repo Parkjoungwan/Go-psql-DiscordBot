@@ -35,18 +35,31 @@ func DBconnect(s *discordgo.Session, m *discordgo.MessageCreate, state int) {
 
 	//create first input for channel_basic
 	if state == 1 {
+		message := m.Content
+		message = strings.Replace(message, "!item ", "", 1)
+		INFO := strings.Split(message, " ")
+		//first check
 		var first bool
 		err := db.QueryRow("select activate from channel_basic where channelid=$1", m.ChannelID).Scan(&first)
 		if err != nil {
 			panic(err)
 		}
+		//not the first time
 		if first == true {
-			s.ChannelMessageSend(m.ChannelID, "이미추가됨")
+			//sql for update
+			updatesql := `
+			UPDATE channel_basic
+			SET channelinfo = $1, trellourl = $2
+			WHERE channelinfo = $3
+			;`
+			//update info
+			_, err = db.Exec(updatesql, INFO[0], INFO[1], m.ChannelID)
+			if err != nil {
+				panic(err)
+			}
+			s.ChannelMessageSend(m.ChannelID, "채널정보갱신"+INFO[0])
 			return
 		}
-		message := m.Content
-		message = strings.Replace(message, "!item ", "", 1)
-		INFO := strings.Split(message, " ")
 		sqlStatement := `
 		INSERT INTO channel_basic (channelid,channelinfo,trellourl,activate)
 		VALUES ($1, $2, $3, true)`
@@ -56,6 +69,19 @@ func DBconnect(s *discordgo.Session, m *discordgo.MessageCreate, state int) {
 			panic(err)
 		}
 		s.ChannelMessageSend(m.ChannelID, "추가완료")
+	}
+	if state == 2 {
+		var info string
+		err := db.QueryRow("select channelinfo from channel_basic where channelid=$1", m.ChannelID).Scan(&info)
+		if err != nil {
+			panic(err)
+		}
+		var url string
+		err = db.QueryRow("select trellourl from channel_basic where channelid=$1", m.ChannelID).Scan(&url)
+		if err != nil {
+			panic(err)
+		}
+		s.ChannelMessageSend(m.ChannelID, "chanenlinfo: "+info+"\n trellourl: "+url)
 	}
 }
 
@@ -114,6 +140,9 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// If the message has "item" add info to DB
 	if strings.Contains(m.Content, "!item") {
 		DBconnect(s, m, 1)
+	}
+	if strings.Contains(m.Content, "!채널정보") {
+		DBconnect(s, m, 2)
 	}
 	// If the message is "ping" reply with "Pong!"
 	if m.Content == "ping" {
