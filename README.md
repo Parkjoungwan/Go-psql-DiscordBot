@@ -7,3 +7,6 @@ DSC에서 프로젝트를 진행함에 있어. Discord를 자주 사용하게되
 
 ## 진행사항
 2020.08.19 - postgresql을 이용한다. DiscordGo를 이용한다. 채널에서 챗봇에서 "item [정보1] [정보2]"를 입력하면 DB에 정보가 insert 된다. 다시 명령어를 사용하면 터진다. primary 키로 채널id를 넣어뒀기 때문이다. 다시 !item입력시 update되도록 바꿔야 한다. (나중에)
+
+## 참고블로그
+[golang postsql querry 문짜기](https://brownbears.tistory.com/186)

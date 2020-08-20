@@ -35,12 +35,21 @@ func DBconnect(s *discordgo.Session, m *discordgo.MessageCreate, state int) {
 
 	//create first input for channel_basic
 	if state == 1 {
+		var first bool
+		err := db.QueryRow("select activate from channel_basic where channelid=$1", m.ChannelID).Scan(&first)
+		if err != nil {
+			panic(err)
+		}
+		if first == true {
+			s.ChannelMessageSend(m.ChannelID, "이미추가됨")
+			return
+		}
 		message := m.Content
 		message = strings.Replace(message, "!item ", "", 1)
 		INFO := strings.Split(message, " ")
 		sqlStatement := `
-		INSERT INTO channel_basic (channelid,channelinfo,trellourl)
-		VALUES ($1, $2, $3)`
+		INSERT INTO channel_basic (channelid,channelinfo,trellourl,activate)
+		VALUES ($1, $2, $3, true)`
 		channelid := m.ChannelID
 		_, err = db.Exec(sqlStatement, channelid, INFO[0], INFO[1])
 		if err != nil {
