@@ -32,6 +32,8 @@ func DBconnect(s *discordgo.Session, m *discordgo.MessageCreate, state int) {
 	if err != nil {
 		panic(err)
 	}
+
+	//create first input for channel_basic
 	if state == 1 {
 		message := m.Content
 		message = strings.Replace(message, "!item ", "", 1)
