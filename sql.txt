@@ -32,7 +32,7 @@ ALTER TABLE DSC_ChatBot_DB.Channel_connected
 
 create table channel_basic
 (
-	channelid int not null,
+	channelid varchar(50) not null,
 	channelinfo varchar(500) null, 
 	trellourl varchar(200) null,
 	activate boolean,
@@ -40,7 +40,7 @@ create table channel_basic
 );
 
 create table channel_connected(
-	channelid int not null,
+	channelid varchar(50) not null,
 	connectionname varchar(45) null,
 	connectionurl varchar(200) null,
 	activate boolean

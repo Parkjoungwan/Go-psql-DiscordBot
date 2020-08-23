@@ -12,4 +12,5 @@ DSC에서 프로젝트를 진행함에 있어. Discord를 자주 사용하게되
 
 
 ## 참고블로그
-[golang postsql querry 문짜기](https://brownbears.tistory.com/186)
+[golang postsql querry 문짜기](https://brownbears.tistory.com/186).  
+[psql server error](https://velog.io/@kim-macbook/postgresql-error-1)
