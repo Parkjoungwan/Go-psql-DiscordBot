@@ -39,14 +39,15 @@ func DBconnect(s *discordgo.Session, m *discordgo.MessageCreate, state int) {
 		message = strings.Replace(message, "!item ", "", 1)
 		INFO := strings.Split(message, " ")
 		//first check
-		var first bool
-		err := db.QueryRow("select activate from channel_basic where channelid=$1", m.ChannelID).Scan(&first)
+		var Notfirst bool
+		err := db.QueryRow("select activate from channel_basic where channelid=$1", m.ChannelID).Scan(&Notfirst)
 		if err != nil {
 			panic(err)
 		}
 		//not the first time
-		if first == true {
+		if Notfirst == true {
 			//sql for update
+			//problem soving updatesql query doesn't work (not fixed)
 			updatesql := `
 			UPDATE channel_basic
 			SET channelinfo = $1, trellourl = $2
@@ -57,19 +58,21 @@ func DBconnect(s *discordgo.Session, m *discordgo.MessageCreate, state int) {
 			if err != nil {
 				panic(err)
 			}
-			s.ChannelMessageSend(m.ChannelID, "채널정보갱신"+INFO[0])
+			s.ChannelMessageSend(m.ChannelID, "채널정보갱신")
 			return
+		} else { //first time
+			sqlStatement := `
+			INSERT INTO channel_basic (channelid,channelinfo,trellourl,activate)
+			VALUES ($1, $2, $3, true)`
+			channelid := m.ChannelID
+			_, err = db.Exec(sqlStatement, channelid, INFO[0], INFO[1])
+			if err != nil {
+				panic(err)
+			}
+			s.ChannelMessageSend(m.ChannelID, "추가완료")
 		}
-		sqlStatement := `
-		INSERT INTO channel_basic (channelid,channelinfo,trellourl,activate)
-		VALUES ($1, $2, $3, true)`
-		channelid := m.ChannelID
-		_, err = db.Exec(sqlStatement, channelid, INFO[0], INFO[1])
-		if err != nil {
-			panic(err)
-		}
-		s.ChannelMessageSend(m.ChannelID, "추가완료")
 	}
+	//show info channelinfo && trellourl
 	if state == 2 {
 		var info string
 		err := db.QueryRow("select channelinfo from channel_basic where channelid=$1", m.ChannelID).Scan(&info)
@@ -137,20 +140,13 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Author.ID == s.State.User.ID {
 		return
 	}
-	// If the message has "item" add info to DB
+	// If the message has "!item" add info to DB
 	if strings.Contains(m.Content, "!item") {
 		DBconnect(s, m, 1)
 	}
+	// if the message has "!채널정보" show info in discord
 	if strings.Contains(m.Content, "!채널정보") {
 		DBconnect(s, m, 2)
 	}
-	// If the message is "ping" reply with "Pong!"
-	if m.Content == "ping" {
-		s.ChannelMessageSend(m.ChannelID, "Pong!")
-	}
 
-	// If the message is "pong" reply with "Ping!"
-	if m.Content == "pong" {
-		s.ChannelMessageSend(m.ChannelID, "Ping!")
-	}
 }
