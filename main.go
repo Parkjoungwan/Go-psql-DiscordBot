@@ -45,7 +45,6 @@ func DBconnect(s *discordgo.Session, m *discordgo.MessageCreate, state int) {
 		//not the first time
 		if Notfirst == true {
 			//sql for update
-			//problem soving updatesql query doesn't work (not fixed)
 			channelid := m.ChannelID
 			updatesql := `
 			UPDATE channel_basic
