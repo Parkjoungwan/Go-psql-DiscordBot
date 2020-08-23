@@ -39,26 +39,33 @@ func DBconnect(s *discordgo.Session, m *discordgo.MessageCreate, state int) {
 		message = strings.Replace(message, "!item ", "", 1)
 		INFO := strings.Split(message, " ")
 		//first check
+
 		var Notfirst bool
 		err := db.QueryRow("select activate from channel_basic where channelid=$1", m.ChannelID).Scan(&Notfirst)
-		if err != nil {
-			panic(err)
-		}
 		//not the first time
 		if Notfirst == true {
 			//sql for update
 			//problem soving updatesql query doesn't work (not fixed)
+			channelid := m.ChannelID
 			updatesql := `
 			UPDATE channel_basic
 			SET channelinfo = $1, trellourl = $2
-			WHERE channelinfo = $3
+			WHERE channelid = $3
 			;`
 			//update info
-			_, err = db.Exec(updatesql, INFO[0], INFO[1], m.ChannelID)
+			result, err := db.Exec(updatesql, INFO[0], INFO[1], channelid)
 			if err != nil {
 				panic(err)
 			}
+			n, err := result.RowsAffected()
+			if n == 0 {
+				fmt.Println("0 row update")
+			}
+
 			s.ChannelMessageSend(m.ChannelID, "채널정보갱신")
+			//test: view changes
+			//DBconnect(s, m, 2)
+
 			return
 		} else { //first time
 			sqlStatement := `
